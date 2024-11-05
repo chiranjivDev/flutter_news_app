@@ -2,24 +2,27 @@ import 'package:flutter/material.dart';
 import '../screens/details_screen.dart';
 
 class ArticleCard extends StatelessWidget {
-  const ArticleCard({Key? key}) : super(key: key);
+  final dynamic article;
+  const ArticleCard({super.key, required this.article});
 
   @override
   Widget build(BuildContext context) {
+    // Print the article object for debugging
+    debugPrint(article.toString());
     return InkWell(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => DetailsScreen(
-              title: 'Sample News Title',
-              content:
-                  'Full content of the news article goes here. This would typically be the full body of the article, providing in-depth information and covering all relevant details.',
-              imageUrl:
-                  'https://picsum.photos/seed/picsum/200/300', // Placeholder image
-              authorName: 'John Smith', // Author's name
-              publishDate: 'May 2024', // Publication date
-              readingTime: '7', // Estimated reading time
+              title: article['title'] ?? 'Sample News Title',
+              content: article['content'] ??
+                  'Full content of the news article goes here.',
+              imageUrl: article['urlToImage'] ??
+                  'https://picsum.photos/seed/picsum/200/300',
+              authorName: article['author'] ?? 'Unknown Author',
+              publishDate: _formatPublishDate(article['publishedAt']),
+              readingTime: '5',
             ),
           ),
         );
@@ -52,7 +55,7 @@ class ArticleCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Sample News Title',
+                    article['title'] ?? 'Sample News Title',
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -75,5 +78,11 @@ class ArticleCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _formatPublishDate(String? publishedAt) {
+    if (publishedAt == null) return 'Unknown Date';
+    final DateTime dateTime = DateTime.parse(publishedAt);
+    return '${dateTime.month} - ${dateTime.day} - ${dateTime.year}';
   }
 }

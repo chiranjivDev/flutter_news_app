@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/article_card.dart';
+import '../services/api_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,6 +18,26 @@ class _HomeScreenState extends State<HomeScreen> {
     'Health'
   ];
   int _selectedCategoryIndex = 0;
+  late Future<List<dynamic>> futureArticles;
+
+  @override
+  void initState() {
+    super.initState();
+    futureArticles = fetchArticles(); // Initial fetch on load
+  }
+
+  Future<List<dynamic>> fetchArticles() async {
+    final category = _categories[_selectedCategoryIndex].toLowerCase();
+    return await NewsService().fetchTopHeadlines(category);
+  }
+
+  void _onCategorySelected(int index) {
+    setState(() {
+      _selectedCategoryIndex = index;
+      futureArticles =
+          fetchArticles(); // Fetch articles for the selected category
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,13 +49,28 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           _buildCategoryBar(),
           Expanded(
-            child: ListView.builder(
-              itemCount: 5,
-              itemBuilder: (context, index) {
-                return const ArticleCard();
+            child: FutureBuilder<List<dynamic>>(
+              future: futureArticles,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Center(child: Text('No articles available.'));
+                } else {
+                  // Display the articles
+                  return ListView.builder(
+                    itemCount: snapshot.data!.length,
+                    itemBuilder: (context, index) {
+                      final article = snapshot.data![index];
+                      return ArticleCard(article: article);
+                    },
+                  );
+                }
               },
             ),
-          ) // Category selection bar
+          )
         ],
       ),
     );
@@ -50,11 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
         itemCount: _categories.length,
         itemBuilder: (context, index) {
           return GestureDetector(
-            onTap: () {
-              setState(() {
-                _selectedCategoryIndex = index;
-              });
-            },
+            onTap: () => _onCategorySelected(index),
             child: Container(
               padding:
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
