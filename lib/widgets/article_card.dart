@@ -12,10 +12,15 @@ class ArticleCard extends StatelessWidget {
           context,
           MaterialPageRoute(
             builder: (context) => DetailsScreen(
-                title: 'Sample News Title',
-                content:
-                    'Full content of the news article goes here. This would typically be the full body of the article, providing in-depth information and covering all relevant details.',
-                imageUrl: 'https://picsum.photos/seed/picsum/200/300'),
+              title: 'Sample News Title',
+              content:
+                  'Full content of the news article goes here. This would typically be the full body of the article, providing in-depth information and covering all relevant details.',
+              imageUrl:
+                  'https://picsum.photos/seed/picsum/200/300', // Placeholder image
+              authorName: 'John Smith', // Author's name
+              publishDate: 'May 2024', // Publication date
+              readingTime: '7', // Estimated reading time
+            ),
           ),
         );
       },
